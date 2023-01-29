@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Color Picker</title>
+    <style>
+        /* Some basic styling for the popup */
+        body {
+            font-family: sans-serif;
+        }
+        /* update the size of color-picker */
+        #color-picker {
+            height: 150px;
+            width: 200px;
+        }
+    </style>
+</head>
+
+<body>
+    <input type="color" id="color-picker">
+    <p>1. Press the big black button<br>
+       2. Click on the paint icon<br>
+       3. Click on the desired area<br>
+       4. Select the code type you need  <span id="hex-code"></span></p>
+    <script>
+        function rgbToHex(rgb) {
+            // Extract the rgb values
+            var r = rgb.substr(0, rgb.indexOf(","));
+            var g = rgb.substr(rgb.indexOf(",") + 1, rgb.lastIndexOf(",") - rgb.indexOf(",") - 1);
+            var b = rgb.substr(rgb.lastIndexOf(",") + 1, rgb.length - 1);
+
+            // Convert the RGB values to hex
+            r = parseInt(r).toString(16);
+            g = parseInt(g).toString(16);
+            b = parseInt(b).toString(16);
+
+            // Pad the hex values with leading zeroes if necessary
+            if (r.length === 1) r = "0" + r;
+            if (g.length === 1) g = "0" + g;
+            if (b.length === 1) b = "0" + b;
+
+            // Return the hex code
+            return "#" + r + g + b;
+        }
+        // Get the color picker element
+        var colorPicker = document.getElementById("color-picker");
+
+        // Get the Hex code element
+        var hexCode = document.getElementById("hex-code");
+
+        // When the user selects a color, update the color code element
+        colorPicker.addEventListener("change", function () {
+            hexCode.innerHTML = this.value;
+        });
+
+        // Listen for a message from the active tab
+        chrome.runtime.onMessage.addListener(
+            function (request, sender, sendResponse) {
+                if (request.action === "element-color") {
+                    colorPicker.value = request.color;
+                    hexCode.innerHTML = rgbToHex(request.color);
+                }
+            });
+
+        // When the popup is opened, send a message to the active tab to get the color of the element under the cursor
+        // and also set the initial value of the color picker and hex code element
+        window.onload = function () {
+            chrome.tabs.query({
+                active: true,
+                currentWindow: true
+            }, function (tabs) {
+                chrome.tabs.sendMessage(tabs[0].id, {
+                    action: "get-element-color"
+                });
+            });
+            // Set the initial value of the color picker and the hex code element
+            var initialColor = "#000000";
+            colorPicker.value = initialColor;
+            hexCode.innerHTML = initialColor;
+}

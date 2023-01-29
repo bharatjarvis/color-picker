@@ -1,0 +1,21 @@
+{
+    "manifest_version": 3,
+    "name": "Color Picker",
+    "description": "This extension allows you to pick the color of elements on a website by hovering over them with your mouse cursor",
+    "version": "1.0",
+    "icons": {
+        "48": "colour.png"
+    },
+    "permissions": [
+        "activeTab"
+    ],
+    "action": {
+        "default_popup": "popup.html"
+    },
+    "content_scripts": [
+        {
+            "matches": ["<all_urls>"],
+            "js": ["content.js"]
+        }
+    ]
+}
